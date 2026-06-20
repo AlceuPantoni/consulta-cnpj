@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.scripts]
-consulta-cnpj = "consulta_cnpj.main:main"
+consulta-cnpj = "consulta_cnpj.cli:run"
 
 [project.optional-dependencies]
 dev = [
