@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from PySide6.QtGui import QIcon
@@ -29,7 +30,7 @@ class MainWindow(QMainWindow):
         self.cnpjs: list[str] = []
 
         self.setWindowTitle("App - Consulta CNPJ")
-        self.setWindowIcon(QIcon("assets/app_icon.png"))
+        self.setWindowIcon(QIcon(str(self.resource_path("assets/app_icon.png"))))
         self.setFixedSize(700, 650)
 
         self.title_label = QLabel("Consulta CNPJ")
@@ -357,3 +358,7 @@ class MainWindow(QMainWindow):
     # ==========================================
     def add_log(self, message: str):
         self.log.append(message)
+    
+    def resource_path(self, relative_path: str | Path) -> Path:
+        base_path = Path(getattr(sys, "_MEIPASS", Path.cwd()))
+        return base_path / Path(relative_path)
