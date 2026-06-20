@@ -1,22 +1,31 @@
 import pandas as pd
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
 class ExcelReader:
-    coluna_cnpj: str = "CNPJ"
+    colunas_validas: list[str] = field(default_factory=lambda: ["CNPJ", "CNPJs", "CNPJ(s)"])
 
     def ler_cnpjs(self, file_path: str) -> list[str]:
-        df = pd.read_excel(file_path, dtype={self.coluna_cnpj: str})
+        df = pd.read_excel(file_path, dtype=str)
 
-        if self.coluna_cnpj not in df.columns:
+        df.columns = df.columns.str.strip().str.upper()
+
+        coluna_alvo = None
+        for col in self.colunas_validas:
+            if col.upper() in df.columns:
+                coluna_alvo = col
+                break
+
+        if not coluna_alvo:
+            nomes_aceitos = ", ".join(self.colunas_validas)
             raise ValueError(
-                f"Coluna '{self.coluna_cnpj}' não encontrada no Excel."
+                f"Coluna com CNPJ não encontrada no Excel.\nNomes aceitos: {nomes_aceitos}."
             )
 
         cnpjs = (
-            df[self.coluna_cnpj]
+            df[coluna_alvo]
             .dropna()
             .astype(str)
             .tolist()
