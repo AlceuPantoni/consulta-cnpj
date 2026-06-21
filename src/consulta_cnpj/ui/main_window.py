@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QGroupBox,
     QFileDialog,
+    QApplication,
 )
 
 from consulta_cnpj.utils.excel_reader import ExcelReader
@@ -128,7 +129,7 @@ class MainWindow(QMainWindow):
         # ==========================
         self.progress = QProgressBar()
         self.progress.setValue(0)
-        self.status_label = QLabel("Aguardando início da consulta")
+        self.status_label = QLabel("Aguardando seleção de arquivo válido")
 
 
         # ==========================
@@ -266,11 +267,8 @@ class MainWindow(QMainWindow):
 
         try:
             self.cnpjs = reader.ler_cnpjs(file_path)
-
             self.info_label.setText(f"{len(self.cnpjs)} CNPJs encontrados")
-            
             self.add_log(f"O Arquivo '{file_name}' foi carregado com sucesso.")
-
             self.status_label.setText("Arquivo pronto para processamento")
             
             if hasattr(self, 'btn_cancel'):
@@ -285,6 +283,8 @@ class MainWindow(QMainWindow):
             self.btn_cancel.setEnabled(False)
             self.cnpjs = []
             self.info_label.setText("Nenhum arquivo carregado")
+            self.status_label.setText("Aguardando seleção de arquivo válido")
+            self.progress.setValue(0)
             self.add_log(f"O Arquivo '{file_name}' é inválido.")
             self.add_log(f"{e}")
 
@@ -323,7 +323,7 @@ class MainWindow(QMainWindow):
             self.status_label.setText("Cancelando, aguarde a finalização da requisição atual...")
             self.add_log("Solicitação de cancelamento enviada. Aguardando conclusão.")
             
-            from PySide6.QtWidgets import QApplication
+            
             QApplication.processEvents()
 
     # ==========================================
@@ -338,15 +338,14 @@ class MainWindow(QMainWindow):
     # ==========================================
 
     def on_process_finished(self, output_path: str):
-        self.status_label.setText("Processamento concluído!")
         self.add_log(f"Arquivo gerado: {output_path}")
 
-        self.input_file = None
         self.cnpjs = []
+        self.file_input.setText("")
         self.info_label.setText("Nenhum arquivo carregado")
         self.status_label.setText("Processamento concluído! Pronto para nova consulta.")
         
-        self.btn_run.setEnabled(True)
+        self.btn_run.setEnabled(False)
         self.btn_select.setEnabled(True)
         if hasattr(self, 'btn_cancel'):
             self.btn_cancel.setEnabled(False)
